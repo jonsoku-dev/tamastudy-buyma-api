@@ -29,13 +29,21 @@ export class UsersService {
     return this.userModel.find(query).skip(offset).limit(limit).exec();
   }
 
-  async findOne(email: string): Promise<User | undefined> {
-    return this.userModel
+  async findOne(email: string): Promise<UserResponseDto> {
+    const foundUser = await this.userModel
       .findOne({
         email,
       })
       .select('password')
       .exec();
+
+    if (!foundUser) {
+      throw new NotFoundException(
+        `${email} 에 해당하는 유저가 존재하지 않습니다.`,
+      );
+    }
+
+    return foundUser;
   }
 
   async create(dto: JoinUserRequestDto): Promise<void> {
